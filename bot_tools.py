@@ -12,8 +12,6 @@ def init_user_data(user_data):
     user_data['db'] = dbhelper.DBHelper(PATHS['to_db'])
     user_data['sights'] = None
     user_data['history'] = None
-    user_data['history_reply'] = None
-    user_data['history_reply_code'] = -1
     user_data['location'] = None
     user_data['next'] = 0
     return user_data
@@ -90,6 +88,5 @@ def get_config_message(msg):
     for line in msg:
         text += line
     return text
-
 
 

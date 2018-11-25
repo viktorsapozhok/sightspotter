@@ -1,6 +1,7 @@
 {
   "max_distance": 10,
   "max_next_events": 5,
+  "timeout_in_sec": 10,
 
   "logging": {
     "format": "%(asctime)s | %(name)s | %(message)s",
@@ -25,11 +26,5 @@
       "history - показать историческую справку (если доступно)\n\n"],
     "unknown": "Некорректный запрос",
     "answer_not_found": "Ответ не найден"
-  },
-
-  "reply_codes": {
-    "not_found": -1,
-    "next_not_found": 0,
-    "found": 1
   }
 }

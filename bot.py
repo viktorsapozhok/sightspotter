@@ -73,10 +73,11 @@ def history(bot, update, user_data):
     return reply.state
 
 
-def stop(bot, update):
+def stop(bot, update, user_data):
     user = update.message.from_user
     logger.info("User %s stopped the conversation", user.first_name)
     update.message.reply_text(config.get('messages').get('stop'), reply_markup=ReplyKeyboardRemove())
+    user_data.clear()
     return ConversationHandler.END
 
 
@@ -119,12 +120,13 @@ def main():
                    MessageHandler(Filters.regex(re.compile('^(answer)$', re.I)), answer, pass_user_data=True),
                    MessageHandler(Filters.regex(re.compile('^(history)$', re.I)), history, pass_user_data=True)]
         },
-        fallbacks=[CommandHandler('stop', stop)]
+        fallbacks=[CommandHandler('stop', stop, pass_user_data=True)],
+        conversation_timeout=config.get('timeout_in_sec')
     )
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('help', bot_help, pass_user_data=True))
     dp.add_handler(CommandHandler('start', start, pass_user_data=True))
-    dp.add_handler(CommandHandler('stop', stop))
+    dp.add_handler(CommandHandler('stop', stop, pass_user_data=True))
     dp.add_handler(MessageHandler(Filters.command, unknown_command, pass_user_data=True))
     dp.add_handler(MessageHandler('', unknown_command, pass_user_data=True))
     dp.add_error_handler(error)
