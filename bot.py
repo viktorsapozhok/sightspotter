@@ -10,7 +10,7 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatAction
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
 import config
 import bot_tools
-from replies import Reply
+from bot_replies import Reply
 from constants import PATHS, STATES
 
 config.init_from_json(PATHS['to_config'])
