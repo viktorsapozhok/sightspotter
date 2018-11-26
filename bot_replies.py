@@ -75,7 +75,7 @@ class Reply(object):
 
     @staticmethod
     def __get_next_markup(history):
-        location_button = KeyboardButton(text="send my current location", request_location=True)
+        location_button = KeyboardButton(text="send current location", request_location=True)
         if history is None:
             keyboard = [['next', 'answer'], [location_button]]
         else:
@@ -84,7 +84,7 @@ class Reply(object):
 
     @staticmethod
     def __get_current_location_markup():
-        keyboard = KeyboardButton(text="send my current location", request_location=True)
+        keyboard = KeyboardButton(text="send current location", request_location=True)
         return ReplyKeyboardMarkup([[keyboard]], resize_keyboard=True)
 
     @staticmethod
@@ -104,12 +104,10 @@ class Reply(object):
     @staticmethod
     def __get_sight_reply(sight):
         reply = '\n'
-        if sight[0] > 10:
+        if sight[0] > 1:
             dist_text = '%.0f км' % sight[0]
-        elif sight[0] > 0:
-            dist_text = '%.1f км' % sight[0]
         else:
-            dist_text = '0 м'
+            dist_text = '< 1 км'
         reply += '<b>%s</b> (%s)\n' % (sight[1][3], dist_text)
         reply += '%s\n<i>%s</i>\n\n' % (sight[1][4], sight[1][5])
         return reply
