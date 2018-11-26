@@ -1,10 +1,8 @@
 # A.Piskun
 # 24/11/2018
 #
-# running tests from command line:
-#       sightspotter> python -m pytest tests/
-#
 import os
+from telegram import Location
 import config
 import bot_tools
 from bot_replies import Reply
@@ -30,7 +28,7 @@ def test_start_reply():
 
 def test_remote_location_reply():
     user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, get_location(57.9, 20.4))
+    user_data = bot_tools.init_new_location(user_data, Location(20.4, 57.9))
     reply = Reply(user_data, 'location')
     assert reply.n_sights == 0
     assert reply.sight is None
@@ -39,16 +37,16 @@ def test_remote_location_reply():
 
 def test_sight_location_reply():
     user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, get_location(55.688832, 37.620948))
+    user_data = bot_tools.init_new_location(user_data, Location(37.620948, 55.688832))
     reply = Reply(user_data, 'location')
     assert reply.n_sights == config.get('max_next_events') + 1
-    assert len(reply.markup.keyboard[0]) == 2
+    assert len(reply.markup.keyboard[0]) >= 2
     assert len(reply.markup.keyboard[1]) == 1
 
 
 def test_history_location_reply():
     user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, get_location(51.521681, -0.09531))
+    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
     reply = Reply(user_data, 'location')
     assert reply.history is not None
     assert reply.n_sights == config.get('max_next_events') + 1
@@ -58,7 +56,7 @@ def test_history_location_reply():
 
 def test_max_next_reply():
     user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, get_location(51.521681, -0.09531))
+    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
     user_data['next'] = config.get('max_next_events') + 1
     reply = Reply(user_data, 'next')
     assert len(reply.markup.keyboard) == 1
@@ -67,13 +65,29 @@ def test_max_next_reply():
     assert button.request_location is True
 
 
-def get_location(latitude, longitude):
-    class Location(object):
-        def __init__(self):
-            self.latitude = latitude
-            self.longitude = longitude
-    return Location()
+def test_last_next_reply():
+    user_data = bot_tools.init_user_data({})
+    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
+    user_data['sights'] = user_data['sights'][:3]
+    user_data['next'] = 2
+    reply = Reply(user_data, 'next')
+    assert len(reply.markup.keyboard[0]) >= 2
+    assert len(reply.markup.keyboard[1]) == 1
+
+    user_data['next'] = 3
+    reply = Reply(user_data, 'next')
+    assert len(reply.markup.keyboard) == 1
+    assert len(reply.markup.keyboard[0]) == 1
+    button = reply.markup.keyboard[0][0]
+    assert button.request_location is True
 
 
+def test_show_map_reply():
+    user_data = bot_tools.init_user_data({})
+    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
+    reply = Reply(user_data, 'show_map')
+    assert reply.location is not None
+    assert isinstance(reply.location.latitude, float) is True
+    assert isinstance(reply.location.longitude, float) is True
 
 

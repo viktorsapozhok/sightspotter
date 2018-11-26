@@ -48,3 +48,17 @@ class DBHelper(object):
         cur.execute(sql, (date, name, action))
         self.conn.commit()
 
+    def select_nearest_sights(self, lat, lon, max_dist):
+        sql = '''
+        SELECT sight_id, lat, lon, address, description, quest, answer, 
+        (6371 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lon) - 
+        radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance 
+        FROM sights 
+        HAVING distance < (?)'''
+        args = (lat, lon, lat, max_dist)
+        cur = self.conn.cursor()
+        cur.execute(sql, args)
+        return cur.fetchall()
+
+
+

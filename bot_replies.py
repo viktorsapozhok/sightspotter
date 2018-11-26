@@ -2,7 +2,7 @@
 # 25/11/2018
 #
 #
-from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Location
 import bot_tools
 import config
 from constants import STATES
@@ -14,6 +14,7 @@ class Reply(object):
         self.text = ''
         self.markup = None
         self.state = -1
+        self.location = None
         self.n_sights = 0
         self.next = user_data['next']
         self.n_sights = self.__get_sights_count(user_data['sights'])
@@ -32,6 +33,8 @@ class Reply(object):
             self.__build_answer_reply()
         elif self.callback == 'history':
             self.__build_history_reply()
+        elif self.callback == 'show_map':
+            self.__build_show_map_reply()
 
     def __build_start_reply(self):
         self.text = bot_tools.get_config_message(config.get('messages').get('start'))
@@ -51,7 +54,7 @@ class Reply(object):
             self.text = config.get('messages').get('max_next_events')
             self.markup = self.__get_current_location_markup()
             self.state = STATES['location']
-        elif self.next > self.n_sights:
+        elif self.next >= self.n_sights:
             self.text = self.__get_next_not_found_reply(config.get('max_distance'))
             self.markup = self.__get_current_location_markup()
             self.state = STATES['location']
@@ -68,6 +71,11 @@ class Reply(object):
         self.markup = self.__get_next_markup(self.history)
         self.state = STATES['next']
 
+    def __build_show_map_reply(self):
+        self.location = Location(self.sight[1][2], self.sight[1][1])
+        self.markup = self.__get_next_markup(self.history)
+        self.state = STATES['next']
+
     def __build_sight_reply(self):
         self.text = self.__get_sight_reply(self.sight)
         self.markup = self.__get_next_markup(self.history)
@@ -77,9 +85,9 @@ class Reply(object):
     def __get_next_markup(history):
         location_button = KeyboardButton(text="send current location", request_location=True)
         if history is None:
-            keyboard = [['next', 'answer'], [location_button]]
+            keyboard = [['next', 'answer'], ['show map'], [location_button]]
         else:
-            keyboard = [['next', 'answer', 'history'], [location_button]]
+            keyboard = [['next', 'answer', 'history'], ['show map'], [location_button]]
         return ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
 
     @staticmethod
@@ -106,10 +114,10 @@ class Reply(object):
         reply = '\n'
         if sight[0] > 1:
             dist_text = '%.0f км' % sight[0]
-            reply += '<b>%s</b> (%s)\n' % (sight[1][3], dist_text)
+            reply += '*%s* (%s)\n' % (sight[1][3], dist_text)
         else:
-            reply += '<b>%s</b>\n' % sight[1][3]
-        reply += '%s\n<i>%s</i>\n\n' % (sight[1][4], sight[1][5])
+            reply += '*%s*\n' % sight[1][3]
+        reply += '%s\n_%s_\n\n' % (sight[1][4], sight[1][5])
         return reply
 
     @staticmethod

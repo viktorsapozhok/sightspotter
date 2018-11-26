@@ -6,7 +6,7 @@ import argparse
 import logging
 import os
 import re
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, ChatAction
+from telegram import ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
 import config
 import bot_tools
@@ -40,7 +40,7 @@ def location(bot, update, user_data):
 
     user_data = bot_tools.init_new_location(user_data, user_location)
     reply = Reply(user_data, 'location')
-    update.message.reply_text(reply.text, parse_mode='HTML', reply_markup=reply.markup)
+    update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'location')
     return reply.state
 
@@ -50,7 +50,7 @@ def bot_next(bot, update, user_data):
     logger.info("%s: %s", user.first_name, update.message.text)
     user_data['next'] += 1
     reply = Reply(user_data, 'next')
-    update.message.reply_text(reply.text, parse_mode='HTML', reply_markup=reply.markup)
+    update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'next')
     return reply.state
 
@@ -59,7 +59,7 @@ def answer(bot, update, user_data):
     user = update.message.from_user
     logger.info("%s: %s", user.first_name, update.message.text)
     reply = Reply(user_data, 'answer')
-    update.message.reply_text(reply.text, parse_mode='HTML', reply_markup=reply.markup)
+    update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'answer')
     return reply.state
 
@@ -68,8 +68,24 @@ def history(bot, update, user_data):
     user = update.message.from_user
     logger.info("%s: %s", user.first_name, update.message.text)
     reply = Reply(user_data, 'history')
-    update.message.reply_text(reply.text, parse_mode='HTML', reply_markup=reply.markup)
+    update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'history')
+    return reply.state
+
+
+def show_map(bot, update, user_data):
+    user = update.message.from_user
+    logger.info("%s: %s", user.first_name, update.message.text)
+    reply = Reply(user_data, 'show_map')
+
+    if reply.location is not None:
+        bot.sendLocation(update.message.chat_id,
+                         latitude=reply.location.latitude,
+                         longitude=reply.location.longitude)
+    else:
+        update.message.reply_text(config.get('messages').get('unknown'), reply_markup=reply.markup)
+
+    bot_tools.add_user_log(user_data['db'], user.full_name, 'show_map')
     return reply.state
 
 
@@ -84,7 +100,9 @@ def stop(bot, update, user_data):
 def bot_help(bot, update, user_data):
     user = update.message.from_user
     logger.info("User %s opened help", user.first_name)
-    update.message.reply_text(bot_tools.get_config_message(config.get('messages').get('help')))
+    update.message.reply_text(
+        bot_tools.get_config_message(config.get('messages').get('help')),
+        parse_mode='Markdown', reply_markup=ReplyKeyboardRemove())
     return bot_tools.get_state(user_data)
 
 
@@ -118,7 +136,8 @@ def main():
             STATES['next']: [MessageHandler(Filters.location, location, pass_user_data=True),
                    MessageHandler(Filters.regex(re.compile('^(next)$', re.I)), bot_next, pass_user_data=True),
                    MessageHandler(Filters.regex(re.compile('^(answer)$', re.I)), answer, pass_user_data=True),
-                   MessageHandler(Filters.regex(re.compile('^(history)$', re.I)), history, pass_user_data=True)]
+                   MessageHandler(Filters.regex(re.compile('^(history)$', re.I)), history, pass_user_data=True),
+                   MessageHandler(Filters.regex(re.compile('^(show map)$', re.I)), show_map, pass_user_data=True)]
         },
         fallbacks=[CommandHandler('stop', stop, pass_user_data=True)],
         conversation_timeout=config.get('timeout_in_sec')
