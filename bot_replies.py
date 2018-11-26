@@ -106,9 +106,9 @@ class Reply(object):
         reply = '\n'
         if sight[0] > 1:
             dist_text = '%.0f км' % sight[0]
+            reply += '<b>%s</b> (%s)\n' % (sight[1][3], dist_text)
         else:
-            dist_text = '< 1 км'
-        reply += '<b>%s</b> (%s)\n' % (sight[1][3], dist_text)
+            reply += '<b>%s</b>\n' % sight[1][3]
         reply += '%s\n<i>%s</i>\n\n' % (sight[1][4], sight[1][5])
         return reply
 
