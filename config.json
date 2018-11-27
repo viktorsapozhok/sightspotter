@@ -30,5 +30,13 @@
       "*history* - показать историческую справку (доступно не для всех мест)"],
     "unknown": "Некорректный запрос",
     "answer_not_found": "Ответ не найден"
+  },
+
+  "button_titles": {
+    "next": "next",
+    "answer": "answer",
+    "history": "history",
+    "show_map": "show map",
+    "send_location": "send current location"
   }
 }

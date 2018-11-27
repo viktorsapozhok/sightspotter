@@ -83,16 +83,23 @@ class Reply(object):
 
     @staticmethod
     def __get_next_markup(history):
-        location_button = KeyboardButton(text="send current location", request_location=True)
+        location_button = KeyboardButton(
+            text=config.get('button_titles').get('send_location'), request_location=True)
         if history is None:
-            keyboard = [['next', 'answer'], ['show map'], [location_button]]
+            keyboard = [
+                [config.get('button_titles').get('next'), config.get('button_titles').get('answer')],
+                [config.get('button_titles').get('show_map')], [location_button]]
         else:
-            keyboard = [['next', 'answer', 'history'], ['show map'], [location_button]]
+            keyboard = [[config.get('button_titles').get('next'),
+                         config.get('button_titles').get('answer'),
+                         config.get('button_titles').get('history')],
+                        [config.get('button_titles').get('show_map')], [location_button]]
         return ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
 
     @staticmethod
     def __get_current_location_markup():
-        keyboard = KeyboardButton(text="send current location", request_location=True)
+        keyboard = KeyboardButton(
+            config.get('button_titles').get('send_location'), request_location=True)
         return ReplyKeyboardMarkup([[keyboard]], resize_keyboard=True)
 
     @staticmethod
