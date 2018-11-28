@@ -32,7 +32,8 @@ class DBHelper(object):
         address TEXT NOT NULL,
         description TEXT,
         quest TEXT,
-        answer TEXT);''')
+        answer TEXT,
+        year integer);''')
 
         cur.execute('''
         CREATE TABLE IF NOT EXISTS history(
@@ -50,7 +51,7 @@ class DBHelper(object):
         self.conn.commit()
 
     def add_sights(self, parsed):
-        sql = 'INSERT INTO sights VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        sql = 'INSERT INTO sights VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         cur = self.conn.cursor()
         cur.executemany(sql, parsed)
         self.conn.commit()
@@ -101,8 +102,10 @@ class DBHelper(object):
         cur.execute('SELECT max(sight_id) FROM sights')
         try:
             sight_id = cur.fetchall()[0][0]
+            if sight_id is None:
+                return 0
         except IndexError:
-            sight_id = 0
+            return 0
         return sight_id
 
 

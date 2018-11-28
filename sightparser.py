@@ -14,12 +14,13 @@ class Parser(object):
     def __init__(self, path2db, url, **kwargs):
         self.db = DBHelper(path2db)
         self.url = url
-        self.overwrite = kwargs.get('overwrite', False)
+        #if true then overwrite tables, if false then add to tables
+        self.parse_all = kwargs.get('parse_all', False)
 
     def parse(self, logger):
         self.db.create_tables()
 
-        if self.overwrite:
+        if self.parse_all:
             self.db.clear_tables()
 
         logger.info('extracting route urls')
@@ -65,6 +66,11 @@ class Parser(object):
 
     def parse_route(self, url, sights, histories, index):
         event = self.__get_event(url)
+
+        if event is None:
+            return sights, histories, index
+
+        year = self.__get_year(event)
         response = requests.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
         tags = soup.findAll(id=re.compile("cp"))
@@ -107,7 +113,7 @@ class Parser(object):
                 continue
 
             index += 1
-            sights.append((index, latitude, longitude, event, cp_id, address, description, quest, answer))
+            sights.append((index, latitude, longitude, event, cp_id, address, description, quest, answer, year))
 
             if len(history) > 0:
                 histories.append((index, event, cp_id, history))
@@ -119,8 +125,16 @@ class Parser(object):
         try:
             event = url[(url.index('events/') + 7):(url.index('routes/all') - 1)]
         except ValueError:
-            event = ''
+            event = None
         return event
+
+    @staticmethod
+    def __get_year(event):
+        try:
+            year = int(event[-4:])
+        except ValueError:
+            year = -1
+        return year
 
     @staticmethod
     def __get_tag_text(tag, sibling, attr):

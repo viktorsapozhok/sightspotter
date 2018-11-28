@@ -119,6 +119,7 @@ def error(bot, update, error):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-test', action='store_true')
+    parser.add_argument('-parse', action='store_true')
     args = parser.parse_args()
 
     if args.test:
@@ -127,9 +128,15 @@ def main():
     else:
         token = os.environ['SSB_TOKEN']
 
-    #check new routes and parse if exists
-    parser = Parser(PATHS['to_db'], config.get('parser').get('url'))
-    parser.parse(logger)
+    if args.parse:
+        #parse all routes
+        parser = Parser(PATHS['to_db'], config.get('parser').get('url'), parse_all=True)
+        parser.parse(logger)
+        return
+    else:
+        #check new routes and parse if exists
+        parser = Parser(PATHS['to_db'], config.get('parser').get('url'))
+        parser.parse(logger)
 
     updater = Updater(token)
     dp = updater.dispatcher
@@ -157,6 +164,10 @@ def main():
     logger.info("started polling")
     updater.start_polling()
     updater.idle()
+#    logger.info('running test bot')
+#    token = os.environ['SSB_TEST_TOKEN']
+#    parser = Parser(PATHS['to_db'], config.get('parser').get('url'), parse_all=True)
+#    parser.parse(logger)
 
 
 if __name__ == '__main__':
