@@ -9,6 +9,7 @@ import re
 from telegram import ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
 import config
+from sightparser import Parser
 import bot_tools
 from bot_replies import Reply
 from constants import PATHS, STATES
@@ -121,10 +122,14 @@ def main():
     args = parser.parse_args()
 
     if args.test:
-        logger.info('Running test bot')
+        logger.info('running test bot')
         token = os.environ['SSB_TEST_TOKEN']
     else:
         token = os.environ['SSB_TOKEN']
+
+    #check new routes and parse if exists
+    parser = Parser(PATHS['to_db'], config.get('parser').get('url'))
+    parser.parse(logger)
 
     updater = Updater(token)
     dp = updater.dispatcher
@@ -149,7 +154,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.command, unknown_command, pass_user_data=True))
     dp.add_handler(MessageHandler('', unknown_command, pass_user_data=True))
     dp.add_error_handler(error)
-    logger.info("Started polling")
+    logger.info("started polling")
     updater.start_polling()
     updater.idle()
 

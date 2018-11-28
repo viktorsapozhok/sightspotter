@@ -1,6 +1,7 @@
 # A.Piskun
 # 05/11/2018
 #
+# db wrapper
 #
 import sqlite3
 from datetime import datetime
@@ -13,13 +14,51 @@ class DBHelper(object):
         self.create_tables()
 
     def create_tables(self):
-        sql = '''
+        cur = self.conn.cursor()
+
+        cur.execute('''
         CREATE TABLE IF NOT EXISTS user_log(
         date DATE, 
         name TEXT, 
-        action TEXT)'''
+        action TEXT);''')
+
+        cur.execute('''
+        CREATE TABLE IF NOT EXISTS sights(
+        sight_id integer PRIMARY KEY,
+        lat real NOT NULL,
+        lon real NOT NULL,
+        event TEXT,
+        cp_id TEXT NOT NULL,
+        address TEXT NOT NULL,
+        description TEXT,
+        quest TEXT,
+        answer TEXT);''')
+
+        cur.execute('''
+        CREATE TABLE IF NOT EXISTS history(
+        sight_id INTEGER PRIMARY KEY,
+        event TEXT,
+        cp_id TEXT NOT NULL,
+        history TEXT);''')
+
+        self.conn.commit()
+
+    def clear_tables(self):
         cur = self.conn.cursor()
-        cur.execute(sql)
+        cur.execute('DELETE FROM sights')
+        cur.execute('DELETE FROM history')
+        self.conn.commit()
+
+    def add_sights(self, parsed):
+        sql = 'INSERT INTO sights VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        cur = self.conn.cursor()
+        cur.executemany(sql, parsed)
+        self.conn.commit()
+
+    def add_histories(self, parsed):
+        sql = 'INSERT INTO history VALUES(?, ?, ?, ?)'
+        cur = self.conn.cursor()
+        cur.executemany(sql, parsed)
         self.conn.commit()
 
     def select_sights_between(self, lat_1, lat_2, lon_1, lon_2):
@@ -30,6 +69,15 @@ class DBHelper(object):
         args = (lat_1, lat_2, lon_1, lon_2)
         cur = self.conn.cursor()
         cur.execute(sql, args)
+        return cur.fetchall()
+
+    def select_sights_by_event(self, event):
+        sql = '''
+        SELECT sight_id, lat, lon, address, description, quest, answer 
+        FROM sights 
+        WHERE event = (?)'''
+        cur = self.conn.cursor()
+        cur.execute(sql, (event,))
         return cur.fetchall()
 
     def select_history(self, sight_id):
@@ -48,6 +96,14 @@ class DBHelper(object):
         cur.execute(sql, (date, name, action))
         self.conn.commit()
 
+    def get_max_sight_id(self):
+        cur = self.conn.cursor()
+        cur.execute('SELECT max(sight_id) FROM sights')
+        try:
+            sight_id = cur.fetchall()[0][0]
+        except IndexError:
+            sight_id = 0
+        return sight_id
 
 
 
