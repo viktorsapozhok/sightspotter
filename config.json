@@ -1,6 +1,6 @@
 {
   "max_distance": 10,
-  "max_next_events": 5,
+  "max_next_events": 10,
   "timeout_in_sec": 3600,
 
   "logging": {

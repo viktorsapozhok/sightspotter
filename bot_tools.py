@@ -43,21 +43,25 @@ def add_user_log(db, user_name, action):
 
 def find_nearest_sights(db, location):
     max_dist = config.get('max_distance')
+    #define latitude and longitude estimated intervals where we need to find sights
     d_lat = get_latitude_delta(location, max_dist)
     d_lon = get_longitude_delta(location, max_dist)
 
+    #select sights from coordinates square area (upper estimate)
     sights = db.select_sights_between(
         location.latitude - (0.5 * d_lat), location.latitude + (0.5 * d_lat),
         location.longitude - (0.5 * d_lon), location.longitude + (0.5 * d_lon))
     history = []
 
     if len(sights) > 0:
+        #distances between user_location and sights
         dist = [get_distance(s[1], s[2], location) for s in sights]
+        #number of sights we can run through using next
         n_sights = config.get('max_next_events') + 1
         indexes = [i for i in range(0, n_sights) if i < len(sights)]
         sorted_indexes = np.argsort(dist)[indexes]
         sight_idx = [sights[i][0] for i in sorted_indexes]
-        sights = [[dist[i], sights[i]] for i in sorted_indexes]
+        sights = [sights[i] for i in sorted_indexes]
         history = [db.select_history(i) for i in sight_idx]
     return sights, history
 

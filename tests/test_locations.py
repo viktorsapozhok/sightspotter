@@ -19,7 +19,8 @@ def test_remote_location():
 def test_sight_location():
     user_data = bot_tools.init_user_data({})
     sights, _ = bot_tools.find_nearest_sights(user_data['db'], Location(37.620948, 55.688832))
-    assert sights[0][0] == 0
+    assert sights[0][1] == 55.688832
+    assert sights[0][2] == 37.620948
 
 
 def test_sight_history():

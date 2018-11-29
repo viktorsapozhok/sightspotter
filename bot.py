@@ -164,10 +164,6 @@ def main():
     logger.info("started polling")
     updater.start_polling()
     updater.idle()
-#    logger.info('running test bot')
-#    token = os.environ['SSB_TEST_TOKEN']
-#    parser = Parser(PATHS['to_db'], config.get('parser').get('url'), parse_all=True)
-#    parser.parse(logger)
 
 
 if __name__ == '__main__':

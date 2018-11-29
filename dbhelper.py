@@ -11,7 +11,6 @@ class DBHelper(object):
     def __init__(self, path2db):
         self.path2db = path2db
         self.conn = sqlite3.connect(self.path2db, check_same_thread=False)
-        self.create_tables()
 
     def create_tables(self):
         cur = self.conn.cursor()
@@ -48,6 +47,12 @@ class DBHelper(object):
         cur = self.conn.cursor()
         cur.execute('DELETE FROM sights')
         cur.execute('DELETE FROM history')
+        self.conn.commit()
+
+    def drop_tables(self):
+        cur = self.conn.cursor()
+        cur.execute('DROP TABLE IF EXISTS sights')
+        cur.execute('DROP TABLE IF EXISTS history')
         self.conn.commit()
 
     def add_sights(self, parsed):

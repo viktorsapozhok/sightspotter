@@ -18,10 +18,10 @@ class Parser(object):
         self.parse_all = kwargs.get('parse_all', False)
 
     def parse(self, logger):
-        self.db.create_tables()
-
         if self.parse_all:
-            self.db.clear_tables()
+            self.db.drop_tables()
+
+        self.db.create_tables()
 
         logger.info('extracting route urls')
         urls = self.extract_route_urls()

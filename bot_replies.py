@@ -72,7 +72,7 @@ class Reply(object):
         self.state = STATES['next']
 
     def __build_show_map_reply(self):
-        self.location = Location(self.sight[1][2], self.sight[1][1])
+        self.location = Location(self.sight[2], self.sight[1])
         self.markup = self.__get_next_markup(self.history)
         self.state = STATES['next']
 
@@ -118,19 +118,14 @@ class Reply(object):
 
     @staticmethod
     def __get_sight_reply(sight):
-        reply = '\n'
-        if sight[0] > 1:
-            dist_text = '%.0f км' % sight[0]
-            reply += '*%s* (%s)\n' % (sight[1][3], dist_text)
-        else:
-            reply += '*%s*\n' % sight[1][3]
-        reply += '%s\n_%s_\n\n' % (sight[1][4], sight[1][5])
+        reply = '*%s*\n' % sight[3]
+        reply += '%s\n_%s_\n\n' % (sight[4], sight[5])
         return reply
 
     @staticmethod
     def __get_answer_reply(sight):
         try:
-            reply = sight[1][6]
+            reply = sight[6]
         except (ValueError, IndexError):
             reply = config.get('messages').get('answer_not_found')
         return reply
