@@ -25,7 +25,7 @@ def start(bot, update, user_data):
     logger.info("User %s started the conversation", user.first_name)
     user_data = bot_tools.init_user_data(user_data)
     reply = Reply(user_data, 'start')
-    update.message.reply_text(reply.text, reply_markup=reply.markup)
+    update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'start')
     return reply.state
 
@@ -138,6 +138,12 @@ def main():
         parser = Parser(PATHS['to_db'], config.get('parser').get('url'))
         parser.parse(logger)
 
+    #regex patterns
+    pt_next = bot_tools.get_pattern(config.get('button_titles').get('next'))
+    pt_answer = bot_tools.get_pattern(config.get('button_titles').get('answer'))
+    pt_history = bot_tools.get_pattern(config.get('button_titles').get('history'))
+    pt_map = bot_tools.get_pattern(config.get('button_titles').get('map'))
+
     updater = Updater(token)
     dp = updater.dispatcher
     conv_handler = ConversationHandler(
@@ -146,10 +152,10 @@ def main():
         states={
             STATES['location']: [MessageHandler(Filters.location, location, pass_user_data=True)],
             STATES['next']: [MessageHandler(Filters.location, location, pass_user_data=True),
-                   MessageHandler(Filters.regex(re.compile('^(next)$', re.I)), bot_next, pass_user_data=True),
-                   MessageHandler(Filters.regex(re.compile('^(answer)$', re.I)), answer, pass_user_data=True),
-                   MessageHandler(Filters.regex(re.compile('^(history)$', re.I)), history, pass_user_data=True),
-                   MessageHandler(Filters.regex(re.compile('^(show map)$', re.I)), show_map, pass_user_data=True)]
+                   MessageHandler(Filters.regex(pt_next), bot_next, pass_user_data=True),
+                   MessageHandler(Filters.regex(pt_answer), answer, pass_user_data=True),
+                   MessageHandler(Filters.regex(pt_history), history, pass_user_data=True),
+                   MessageHandler(Filters.regex(pt_map), show_map, pass_user_data=True)]
         },
         fallbacks=[CommandHandler('stop', stop, pass_user_data=True)],
         conversation_timeout=config.get('timeout_in_sec')

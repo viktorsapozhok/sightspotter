@@ -28,4 +28,9 @@ def test_sight_history():
     _, history = bot_tools.find_nearest_sights(user_data['db'], Location(-0.09531, 51.521681))
     assert len(history[0][0][1]) > 1000
 
+    history_beg = history[0][0][1][:25]
+    for word in config.get('parser').get('remove_words_hist'):
+        assert word not in history_beg.lower()
+
+
 

@@ -154,7 +154,7 @@ class Parser(object):
                 if 'history' in sibling.attrs['class']:
                     history = tag.find_next('dd', class_='history').text.lstrip().rstrip()
                     history = ' '.join(history.split())
-                    for word in config.get('parser').get('stop_words_addr'):
+                    for word in config.get('parser').get('remove_words_hist'):
                         history = history.replace(word, '').lstrip().rstrip()
         except (ValueError, AttributeError, KeyError):
             history = ''

@@ -2,6 +2,7 @@
 # 09/11/2018
 #
 #
+import re
 import numpy as np
 import config
 import dbhelper
@@ -92,5 +93,11 @@ def get_config_message(msg):
     for line in msg:
         text += line
     return text
+
+
+def get_pattern(str):
+    return re.compile('^(' + str + ')$', re.I)
+
+
 
 
