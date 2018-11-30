@@ -69,7 +69,7 @@ class DBHelper(object):
 
     def select_sights_between(self, lat_1, lat_2, lon_1, lon_2):
         sql = '''
-        SELECT sight_id, lat, lon, address, description, quest, answer 
+        SELECT sight_id, lat, lon, address, description, quest, answer, year 
         FROM sights 
         WHERE (lat between (?) and (?)) and (lon between (?) and (?))'''
         args = (lat_1, lat_2, lon_1, lon_2)
@@ -79,7 +79,7 @@ class DBHelper(object):
 
     def select_sights_by_event(self, event):
         sql = '''
-        SELECT sight_id, lat, lon, address, description, quest, answer 
+        SELECT sight_id, lat, lon, address, description, quest, answer, year 
         FROM sights 
         WHERE event = (?)'''
         cur = self.conn.cursor()

@@ -46,13 +46,15 @@ class Parser(object):
         sights = []
         histories = []
         index = self.db.get_max_sight_id()
+        year = -1
+
         for url in urls:
             try:
                 if self.is_route_parsed(url):
                     break
                 else:
                     logger.info('parsing %s', url)
-                    sights, histories, index = self.parse_route(url, sights, histories, index)
+                    sights, histories, index, year = self.parse_route(url, sights, histories, index, year)
             except ValueError:
                 continue
         return sights, histories
@@ -64,13 +66,13 @@ class Parser(object):
             return False
         return True
 
-    def parse_route(self, url, sights, histories, index):
+    def parse_route(self, url, sights, histories, index, year_prev):
         event = self.__get_event(url)
 
         if event is None:
-            return sights, histories, index
+            return sights, histories, index, year_prev
 
-        year = self.__get_year(event)
+        year = self.__get_year(event, year_prev)
         response = requests.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
         tags = soup.findAll(id=re.compile("cp"))
@@ -118,7 +120,7 @@ class Parser(object):
             if len(history) > 0:
                 histories.append((index, event, cp_id, history))
 
-        return sights, histories, index
+        return sights, histories, index, year
 
     @staticmethod
     def __get_event(url):
@@ -129,11 +131,11 @@ class Parser(object):
         return event
 
     @staticmethod
-    def __get_year(event):
+    def __get_year(event, year_prev):
         try:
             year = int(event[-4:])
         except ValueError:
-            year = -1
+            year = year_prev
         return year
 
     @staticmethod
@@ -144,6 +146,10 @@ class Parser(object):
             text = tag.find_next('dd', class_=attr).text.lstrip().rstrip()
             #replace multiple spaces by single space
             text = ' '.join(text.split())
+            #remove dot in the end of text
+            if len(text) > 0:
+                if text[-1] == '.':
+                    text = text[:-1]
         return text
 
     @staticmethod

@@ -118,8 +118,9 @@ class Reply(object):
 
     @staticmethod
     def __get_sight_reply(sight):
-        reply = '*%s*\n' % sight[3]
-        reply += '%s\n_%s_\n\n' % (sight[4], sight[5])
+        reply = '*Адрес:*\n%s\n\n' % sight[3]
+        reply += '*Задание:*\n%s. %s\n\n' % (sight[4], sight[5])
+        reply += '*Год маршрута:*\n%s' % sight[7]
         return reply
 
     @staticmethod

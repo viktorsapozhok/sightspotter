@@ -14,13 +14,15 @@ def test_parser():
     assert len(urls) >= 299
 
     url = [u for u in urls if 'cherepovets2008' in u]
-    sights, histories, _ = parser.parse_route(url[0], [], [], 0)
+    sights, histories, _, year = parser.parse_route(url[0], [], [], 0, -1)
     assert len(sights) >= 44
+    assert year == 2008
 
     url = [u for u in urls if 'kazan2018' in u]
-    sights, histories, _ = parser.parse_route(url[0], [], [], 0)
+    sights, histories, _, year = parser.parse_route(url[0], [], [], 0, -1)
     assert len(sights) >= 37
     assert len(histories) >= 21
+    assert year == 2018
 
 
 def test_tables():
@@ -45,5 +47,10 @@ def test_tables():
     assert len(t[0]) == 3
 
 
-
+def test_sights_year():
+    conn = sqlite3.connect(PATHS['to_db'])
+    cur = conn.cursor()
+    cur.execute('SELECT year FROM sights where year < 2000')
+    t = cur.fetchall()
+    assert len(t) == 0
 
