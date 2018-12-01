@@ -1,6 +1,6 @@
 # sightspotter
 
-Telegram bot for interactive search of city artefacts based on runcity.org routes database.
+Telegram bot for interactive search of city artefacts based on runcity.org routes database. Discover your city while completing small tasks.
 
 **Account - @sightspotter_bot**
 
