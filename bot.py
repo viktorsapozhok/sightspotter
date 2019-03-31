@@ -1,7 +1,4 @@
-# A.Piskun
-# 05/11/2018
-#
-#
+
 import argparse
 import logging
 import os
