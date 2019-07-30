@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""Bot callbacks
+"""
 
 import argparse
 import logging
@@ -113,62 +117,6 @@ def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-test', action='store_true')
-    parser.add_argument('-parse', action='store_true')
-    args = parser.parse_args()
-
-    if args.test:
-        logger.info('running test bot')
-        token = os.environ['SSB_TEST_TOKEN']
-    else:
-        token = os.environ['SSB_TOKEN']
-
-    if args.parse:
-        #parse all routes
-        parser = Parser(PATHS['to_db'], config.get('parser').get('url'), parse_all=True)
-        parser.parse(logger)
-        return
-    else:
-        #check new routes and parse if exists
-        parser = Parser(PATHS['to_db'], config.get('parser').get('url'))
-        parser.parse(logger)
-
-    #regex patterns
-    pt_next = bot_tools.get_pattern(config.get('button_titles').get('next'))
-    pt_answer = bot_tools.get_pattern(config.get('button_titles').get('answer'))
-    pt_history = bot_tools.get_pattern(config.get('button_titles').get('history'))
-    pt_map = bot_tools.get_pattern(config.get('button_titles').get('map'))
-
-    updater = Updater(token)
-    dp = updater.dispatcher
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start, pass_user_data=True),
-                      MessageHandler(Filters.location, location, pass_user_data=True)],
-        states={
-            STATES['location']: [MessageHandler(Filters.location, location, pass_user_data=True)],
-            STATES['next']: [MessageHandler(Filters.location, location, pass_user_data=True),
-                   MessageHandler(Filters.regex(pt_next), bot_next, pass_user_data=True),
-                   MessageHandler(Filters.regex(pt_answer), answer, pass_user_data=True),
-                   MessageHandler(Filters.regex(pt_history), history, pass_user_data=True),
-                   MessageHandler(Filters.regex(pt_map), show_map, pass_user_data=True)]
-        },
-        fallbacks=[CommandHandler('stop', stop, pass_user_data=True)],
-        conversation_timeout=config.get('timeout_in_sec')
-    )
-    dp.add_handler(conv_handler)
-    dp.add_handler(CommandHandler('help', bot_help, pass_user_data=True))
-    dp.add_handler(CommandHandler('start', start, pass_user_data=True))
-    dp.add_handler(CommandHandler('stop', stop, pass_user_data=True))
-    dp.add_handler(MessageHandler(Filters.command, unknown_command, pass_user_data=True))
-    dp.add_handler(MessageHandler('', unknown_command, pass_user_data=True))
-    dp.add_error_handler(error)
-    logger.info("started polling")
-    updater.start_polling()
-    updater.idle()
 
 
-if __name__ == '__main__':
-    main()
 

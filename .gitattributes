@@ -1,0 +1,4 @@
+app/secret.env filter=git-crypt diff=git-crypt
+app/docker-compose.yml filter=git-crypt diff=git-crypt
+app/bot-deployment.yml filter=git-crypt diff=git-crypt
+

@@ -1,13 +1,9 @@
-# A.Piskun
-# 28/11/2018
-#
-# parsing of events from https://www.runcity.org/ru/events/archive/
-#
+
 import re
 from bs4 import BeautifulSoup
 import requests
-from dbhelper import DBHelper
-import config
+from sightspotter.dbhelper import DBHelper
+from sightspotter import config
 
 
 class Parser(object):
@@ -100,15 +96,15 @@ class Parser(object):
                 answer = self.__get_tag_text(tag, sibling_4, 'answer')
                 history = self.__get_tag_history(tag, sibling_5)
 
-                if len(address) < config.get('parser').get('min_length_addr') or \
-                   len(description) < config.get('parser').get('min_length_descr') or \
-                   len(quest) < config.get('parser').get('min_length_quest') or \
-                   len(answer) < config.get('parser').get('min_length_answer'):
+                if len(address) < config.parser['min_length_addr'] or \
+                   len(description) < config.parser['min_length_descr'] or \
+                   len(quest) < config.parser['min_length_quest'] or \
+                   len(answer) < config.parser['min_length_answer']:
                     continue
 
-                if any(word in address.lower() for word in config.get('parser').get('stop_words_addr')) or \
-                   any(word in description.lower() for word in config.get('parser').get('stop_words_descr')) or \
-                   any(word in quest.lower() for word in config.get('parser').get('stop_words_quest')):
+                if any(word in address.lower() for word in config.parser['stop_words_addr']) or \
+                   any(word in description.lower() for word in config.parser['stop_words_descr']) or \
+                   any(word in quest.lower() for word in config.parser['stop_words_quest']):
                     continue
 
             except (ValueError, AttributeError, KeyError):
@@ -160,10 +156,8 @@ class Parser(object):
                 if 'history' in sibling.attrs['class']:
                     history = tag.find_next('dd', class_='history').text.lstrip().rstrip()
                     history = ' '.join(history.split())
-                    for word in config.get('parser').get('remove_words_hist'):
+                    for word in config.parser['remove_words_hist']:
                         history = history.replace(word, '').lstrip().rstrip()
         except (ValueError, AttributeError, KeyError):
             history = ''
         return history
-
-

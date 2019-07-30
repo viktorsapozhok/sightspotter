@@ -1,11 +1,7 @@
-# A.Piskun
-# 25/11/2018
-#
-#
+
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Location
-import bot_tools
-import config
-from constants import STATES
+from sightspotter import bot_tools
+from sightspotter import config
 
 
 class Reply(object):
@@ -37,80 +33,80 @@ class Reply(object):
             self.__build_show_map_reply()
 
     def __build_start_reply(self):
-        self.text = bot_tools.get_config_message(config.get('messages').get('start'))
+        self.text = config.messages['start']
         self.markup = self.__get_current_location_markup()
-        self.state = STATES['location']
+        self.state = config.states['location']
 
     def __build_location_reply(self):
         if self.n_sights == 0:
-            self.text = self.__get_not_found_reply(config.get('max_distance'))
+            self.text = self.__get_not_found_reply(config.max_dist)
             self.markup = ReplyKeyboardRemove()
-            self.state = STATES['location']
+            self.state = config.states['location']
         else:
             self.__build_sight_reply()
 
     def __build_next_reply(self):
-        if self.next > config.get('max_next_events'):
-            self.text = config.get('messages').get('max_next_events')
+        if self.next > config.n_next:
+            self.text = config.messages['max_next_events']
             self.markup = self.__get_current_location_markup()
-            self.state = STATES['location']
+            self.state = config.states['location']
         elif self.next >= self.n_sights:
-            self.text = self.__get_next_not_found_reply(config.get('max_distance'))
+            self.text = self.__get_next_not_found_reply(config.max_dist)
             self.markup = self.__get_current_location_markup()
-            self.state = STATES['location']
+            self.state = config.states['location']
         else:
             self.__build_sight_reply()
 
     def __build_answer_reply(self):
         self.text = self.__get_answer_reply(self.sight)
         self.markup = self.__get_next_markup(self.history)
-        self.state = STATES['next']
+        self.state = config.states['next']
 
     def __build_history_reply(self):
         self.text = self.history
         self.markup = self.__get_next_markup(self.history)
-        self.state = STATES['next']
+        self.state = config.states['next']
 
     def __build_show_map_reply(self):
         self.location = Location(self.sight[2], self.sight[1])
         self.markup = self.__get_next_markup(self.history)
-        self.state = STATES['next']
+        self.state = config.states['next']
 
     def __build_sight_reply(self):
         self.text = self.__get_sight_reply(self.sight)
         self.markup = self.__get_next_markup(self.history)
-        self.state = STATES['next']
+        self.state = config.states['next']
 
     @staticmethod
     def __get_next_markup(history):
         location_button = KeyboardButton(
-            text=config.get('button_titles').get('location'), request_location=True)
+            text=config.button_titles['location'], request_location=True)
         if history is None:
             keyboard = [
-                [config.get('button_titles').get('next'), config.get('button_titles').get('answer')],
-                [config.get('button_titles').get('map')], [location_button]]
+                [config.button_titles['next'], config.button_titles['answer']],
+                [config.button_titles['map']], [location_button]]
         else:
-            keyboard = [[config.get('button_titles').get('next'),
-                         config.get('button_titles').get('answer'),
-                         config.get('button_titles').get('history')],
-                        [config.get('button_titles').get('map')], [location_button]]
+            keyboard = [[config.button_titles['next'],
+                         config.button_titles['answer'],
+                         config.button_titles['history']],
+                        [config.button_titles['map']], [location_button]]
         return ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
 
     @staticmethod
     def __get_current_location_markup():
         keyboard = KeyboardButton(
-            config.get('button_titles').get('location'), request_location=True)
+            config.button_titles['location'], request_location=True)
         return ReplyKeyboardMarkup([[keyboard]], resize_keyboard=True)
 
     @staticmethod
     def __get_not_found_reply(max_dist):
-        reply = config.get('messages').get('not_found')
+        reply = config.messages['not_found']
         reply += ' %.0f км' % max_dist
         return reply
 
     @staticmethod
     def __get_next_not_found_reply(max_dist):
-        msg = config.get('messages').get('next_not_found')
+        msg = config.messages['next_not_found']
         reply = msg[0]
         reply += ' %.0f км. ' % max_dist
         reply += msg[1]
@@ -128,7 +124,7 @@ class Reply(object):
         try:
             reply = sight[6]
         except (ValueError, IndexError):
-            reply = config.get('messages').get('answer_not_found')
+            reply = config.messages['answer_not_found']
         return reply
 
     @staticmethod
