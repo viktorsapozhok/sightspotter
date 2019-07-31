@@ -17,61 +17,75 @@ logger = logging.getLogger('sightspotter')
 
 def start(bot, update, user_data):
     user = update.message.from_user
-    logger.info("User %s started the conversation", user.first_name)
+    logger.info(f'{user.full_name}: start')
+
     user_data = bot_tools.init_user_data(user_data)
     reply = Reply(user_data, 'start')
+
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'start')
+
     return reply.state
 
 
 def location(bot, update, user_data):
     user = update.message.from_user
     user_location = update.message.location
-    logger.info("Location of %s: %f / %f", user.first_name,
-                user_location.latitude, user_location.longitude)
+    logger.info(f'{user.full_name}: location')
 
     if not bot_tools.is_initialized(user_data):
         user_data = bot_tools.init_user_data(user_data)
 
     user_data = bot_tools.init_new_location(user_data, user_location)
     reply = Reply(user_data, 'location')
+
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'location')
+
     return reply.state
 
 
 def next_sight(bot, update, user_data):
     user = update.message.from_user
-    logger.info("%s: %s", user.first_name, update.message.text)
+    logger.info(f'{user.full_name}: next')
+
     user_data['next'] += 1
     reply = Reply(user_data, 'next')
+
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'next')
+
     return reply.state
 
 
 def answer(bot, update, user_data):
     user = update.message.from_user
-    logger.info("%s: %s", user.first_name, update.message.text)
+    logger.info(f'{user.full_name}: answer')
+
     reply = Reply(user_data, 'answer')
+
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'answer')
+
     return reply.state
 
 
 def history(bot, update, user_data):
     user = update.message.from_user
-    logger.info("%s: %s", user.first_name, update.message.text)
+    logger.info(f'{user.full_name}: history')
+
     reply = Reply(user_data, 'history')
+
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'history')
+
     return reply.state
 
 
 def show_map(bot, update, user_data):
     user = update.message.from_user
-    logger.info("%s: %s", user.first_name, update.message.text)
+    logger.info(f'{user.full_name}: map')
+
     reply = Reply(user_data, 'show_map')
 
     if reply.location is not None:
@@ -82,26 +96,24 @@ def show_map(bot, update, user_data):
         update.message.reply_text(config.messages['unknown'], reply_markup=reply.markup)
 
     bot_tools.add_user_log(user_data['db'], user.full_name, 'show_map')
+
     return reply.state
 
 
 def stop(bot, update, user_data):
     user = update.message.from_user
-    logger.info("User %s stopped the conversation", user.first_name)
+    logger.info(f'{user.full_name}: stop')
     update.message.reply_text(config.messages['stop'], reply_markup=ReplyKeyboardRemove())
     user_data.clear()
+
     return ConversationHandler.END
 
 
 def help_message(bot, update, user_data):
     user = update.message.from_user
-    logger.info("User %s opened help", user.first_name)
+    logger.info(f'{user.full_name}: help')
 
-    update.message.reply_text(
-        config.messages['help'],
-        parse_mode='Markdown',
-        reply_markup=ReplyKeyboardRemove()
-    )
+    update.message.reply_text(config.messages['help'], parse_mode='Markdown', reply_markup=ReplyKeyboardRemove())
 
     return bot_tools.get_state(user_data)
 

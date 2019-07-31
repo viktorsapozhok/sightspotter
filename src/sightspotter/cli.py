@@ -13,7 +13,6 @@ from telegram.ext import MessageHandler
 from telegram.ext import Updater
 
 from db_commuter import SQLiteCommuter
-
 from sightspotter.parser import RouteParser
 from sightspotter import callbacks
 from sightspotter import config
@@ -91,20 +90,14 @@ def poll(test):
     '--all', is_flag=True, help='Parse all routes')
 @click.option(
     '--overwrite', is_flag=True, help='Overwrite parsed routes')
-@click.option(
-    '--create', is_flag=True, help='Create tables in database')
 def parse(**kwargs):
     """Parse new routes from runcity.org
     """
     commuter = SQLiteCommuter(config.path_to_db)
 
     if kwargs.get('overwrite'):
-        commuter.execute('delete from sights')
-        commuter.execute('delete from history')
-
-    if kwargs.get('create'):
-        path_to_script = os.path.join(config.path_to_scripts, 'create_tables.sql')
-        commuter.execute_script(path_to_script, commit=True)
+        commuter.execute_script(os.path.join(config.path_to_scripts, 'delete_tables.sql'), commit=True)
+        commuter.execute_script(os.path.join(config.path_to_scripts, 'create_tables.sql'), commit=True)
 
     parser = RouteParser(
         commuter,

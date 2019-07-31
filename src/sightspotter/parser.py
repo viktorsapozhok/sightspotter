@@ -44,7 +44,12 @@ class RouteParser(object):
                 if self._is_route_parsed(route):
                     continue
                 else:
+                    # parse sights and histories from route page
                     sights, histories, sight_id, year = self.parse_route(route, sight_id, year)
+                    event = self._get_event(route)
+
+                    # export parsed data to database
+                    self._insert_to_table('routes', [[event, year, route]])
                     self._insert_to_table('sights', sights)
                     self._insert_to_table('history', histories)
             except ValueError:
