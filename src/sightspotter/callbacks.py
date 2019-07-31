@@ -10,7 +10,8 @@ from telegram.ext import ConversationHandler
 
 from sightspotter import config
 from sightspotter import bot_tools
-from sightspotter.bot_replies import Reply
+from sightspotter import replies
+from sightspotter import utils
 
 logger = logging.getLogger('sightspotter')
 
@@ -20,7 +21,7 @@ def start(bot, update, user_data):
     logger.info(f'{user.full_name}: start')
 
     user_data = bot_tools.init_user_data(user_data)
-    reply = Reply(user_data, 'start')
+    reply = replies.StartReply(user_data)
 
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'start')
@@ -37,7 +38,11 @@ def location(bot, update, user_data):
         user_data = bot_tools.init_user_data(user_data)
 
     user_data = bot_tools.init_new_location(user_data, user_location)
-    reply = Reply(user_data, 'location')
+
+    if utils.get_sights_count(user_data['sights']) == 0:
+        reply = replies.NotFoundReply(user_data)
+    else:
+        reply = replies.SightReply(user_data)
 
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'location')
@@ -50,7 +55,14 @@ def next_sight(bot, update, user_data):
     logger.info(f'{user.full_name}: next')
 
     user_data['next'] += 1
-    reply = Reply(user_data, 'next')
+    n_sights = utils.get_sights_count(user_data['sights'])
+
+    if user_data['next'] > config.n_next:
+        reply = replies.MaxNextEventsReply(user_data)
+    elif user_data['next'] >= n_sights:
+        reply = replies.NextNotFoundReply(user_data)
+    else:
+        reply = replies.SightReply(user_data)
 
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'next')
@@ -62,7 +74,7 @@ def answer(bot, update, user_data):
     user = update.message.from_user
     logger.info(f'{user.full_name}: answer')
 
-    reply = Reply(user_data, 'answer')
+    reply = replies.AnswerReply(user_data)
 
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'answer')
@@ -74,7 +86,7 @@ def history(bot, update, user_data):
     user = update.message.from_user
     logger.info(f'{user.full_name}: history')
 
-    reply = Reply(user_data, 'history')
+    reply = replies.HistoryReply(user_data)
 
     update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
     bot_tools.add_user_log(user_data['db'], user.full_name, 'history')
@@ -86,12 +98,13 @@ def show_map(bot, update, user_data):
     user = update.message.from_user
     logger.info(f'{user.full_name}: map')
 
-    reply = Reply(user_data, 'show_map')
+    reply = replies.MapReply(user_data)
 
     if reply.location is not None:
-        bot.sendLocation(update.message.chat_id,
-                         latitude=reply.location.latitude,
-                         longitude=reply.location.longitude)
+        bot.sendLocation(
+            update.message.chat_id,
+            latitude=reply.location.latitude,
+            longitude=reply.location.longitude)
     else:
         update.message.reply_text(config.messages['unknown'], reply_markup=reply.markup)
 
@@ -125,3 +138,4 @@ def unknown_command(bot, update, user_data):
 
 def error_message(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
+

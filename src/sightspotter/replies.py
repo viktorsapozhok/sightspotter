@@ -11,27 +11,25 @@ from telegram import KeyboardButton
 from telegram import Location
 
 from sightspotter import config
-from sightspotter import utils
 
 
 class BotReply(abc.ABC):
     def __init__(self, user_data):
         self.user_data = user_data
 
-        self.text = self.get_text()
-        self.markup = self.get_markup()
-        self.state = self.get_state()
-
+    @property
     @abc.abstractmethod
-    def get_text(self):
+    def text(self):
         raise NotImplementedError()
 
+    @property
     @abc.abstractmethod
-    def get_markup(self):
+    def markup(self):
         raise NotImplementedError()
 
+    @property
     @abc.abstractmethod
-    def get_state(self):
+    def state(self):
         raise NotImplementedError()
 
 
@@ -39,17 +37,20 @@ class StartReply(BotReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
-    def get_text(self):
+    @property
+    def text(self):
         return config.messages['start']
 
-    def get_markup(self):
+    @property
+    def markup(self):
         keyboard = KeyboardButton(
             config.button_titles['location'],
             request_location=True
         )
         return ReplyKeyboardMarkup([[keyboard]], resize_keyboard=True)
 
-    def get_state(self):
+    @property
+    def state(self):
         return config.states['location']
 
 
@@ -57,13 +58,16 @@ class NotFoundReply(BotReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
-    def get_text(self):
+    @property
+    def text(self):
         return config.messages['not_found']
 
-    def get_markup(self):
+    @property
+    def markup(self):
         return ReplyKeyboardRemove()
 
-    def get_state(self):
+    @property
+    def state(self):
         return config.states['location']
 
 
@@ -74,15 +78,17 @@ class SightReply(BotReply):
         self.sight = self._get_sight()
         self.history = self._get_history()
 
-    def get_text(self):
+    @property
+    def text(self):
         nl = '\n'
         reply = \
-            f'*Адрес:*{nl + self.sight[3] + nl + nl} ' \
-            f'*Задание:*{nl + self.sight[4]}. {self.sight[5] + nl + nl} ' \
-            f'*Год маршрута:*{nl + self.sight[7]}'
+            f'*Адрес:*{nl + str(self.sight[3]) + nl + nl} ' \
+            f'*Задание:*{nl + str(self.sight[4])}. {str(self.sight[5]) + nl + nl} ' \
+            f'*Год маршрута:*{nl + str(self.sight[7])}'
         return reply
 
-    def get_markup(self):
+    @property
+    def markup(self):
         location_button = KeyboardButton(
             text=config.button_titles['location'],
             request_location=True
@@ -103,7 +109,8 @@ class SightReply(BotReply):
             one_time_keyboard=False,
             resize_keyboard=True)
 
-    def get_state(self):
+    @property
+    def state(self):
         return config.states['next']
 
     def _get_sight(self):
@@ -125,19 +132,12 @@ class SightReply(BotReply):
         return history
 
 
-class LocationReply(NotFoundReply, SightReply):
-    def __init__(self, user_data):
-        if utils.get_sights_count(user_data['sights']) == 0:
-            super(NotFoundReply, self).__init__(user_data)
-        else:
-            super(SightReply, self).__init__(user_data)
-
-
 class MaxNextEventsReply(StartReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
-    def get_text(self):
+    @property
+    def text(self):
         return config.messages['max_next_events']
 
 
@@ -145,27 +145,17 @@ class NextNotFoundReply(StartReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
-    def get_text(self):
+    @property
+    def text(self):
         return config.messages['next_not_found']
-
-
-class NextReply(MaxNextEventsReply, NextNotFoundReply, SightReply):
-    def __init__(self, user_data):
-        n_sights = utils.get_sights_count(user_data['sights'])
-
-        if user_data['next'] > config.n_next:
-            super(MaxNextEventsReply, self).__init__(user_data)
-        elif user_data['next'] >= n_sights:
-            super(NextNotFoundReply, self).__init__(user_data)
-        else:
-            super(SightReply, self).__init__(user_data)
 
 
 class AnswerReply(SightReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
-    def get_text(self):
+    @property
+    def text(self):
         try:
             reply = self.sight[6]
         except (ValueError, IndexError):
@@ -177,11 +167,16 @@ class HistoryReply(SightReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
-    def get_text(self):
+    @property
+    def text(self):
         return self.history
 
 
 class MapReply(SightReply):
     def __init__(self, user_data):
         super().__init__(user_data)
-        self.location = Location(self.sight[2], self.sight[1])
+
+    @property
+    def location(self):
+        return Location(self.sight[2], self.sight[1])
+
