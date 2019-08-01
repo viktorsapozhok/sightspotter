@@ -37,7 +37,7 @@ setup(
         'db-commuter>=0.1.6',
         'numpy',
         'python-dotenv',
-        'python-telegram-bot>=11.1.0',
+        'python-telegram-bot>=12',
         'requests',
         'tqdm'
     ],

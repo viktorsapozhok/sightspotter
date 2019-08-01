@@ -41,7 +41,7 @@ def poll(test):
     cmd_history = utils.command_pattern(config.button_titles['history'])
     cmd_map = utils.command_pattern(config.button_titles['map'])
 
-    updater = Updater(token)
+    updater = Updater(token, use_context=True)
     dispatcher = updater.dispatcher
 
     entry_points = [
