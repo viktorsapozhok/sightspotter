@@ -6,17 +6,11 @@
 import click
 import os
 
-from telegram.ext import CommandHandler
-from telegram.ext import ConversationHandler
-from telegram.ext import Filters
-from telegram.ext import MessageHandler
-from telegram.ext import Updater
+from telegram.ext import CommandHandler, ConversationHandler
+from telegram.ext import Filters, MessageHandler, Updater
 
-from db_commuter import SQLiteCommuter
 from sightspotter.parser import RouteParser
-from sightspotter import callbacks
-from sightspotter import config
-from sightspotter import utils
+from sightspotter import callbacks, config, utils
 
 logger = config.setup_logger()
 
@@ -27,9 +21,9 @@ def sightspotter():
     """
 
 
-@sightspotter.command()
-@click.option(
-    '--test', is_flag=True, help='Running in test environment')
+#@sightspotter.command()
+#@click.option(
+#    '--test', is_flag=True, help='Running in test environment')
 def poll(test):
     """Start polling
     """
@@ -45,16 +39,16 @@ def poll(test):
     dispatcher = updater.dispatcher
 
     entry_points = [
-        CommandHandler('start', callbacks.start, pass_user_data=True),
-        MessageHandler(Filters.location, callbacks.location, pass_user_data=True)
+        CommandHandler('start', callbacks.Start().callback, pass_user_data=True),
+        MessageHandler(Filters.location, callbacks.Location().callback, pass_user_data=True)
     ]
 
     conversation_states = {
         config.states['location']: [
-            MessageHandler(Filters.location, callbacks.location, pass_user_data=True)
+            MessageHandler(Filters.location, callbacks.Location().callback, pass_user_data=True)
         ],
         config.states['next']: [
-            MessageHandler(Filters.location, callbacks.location, pass_user_data=True),
+            MessageHandler(Filters.location, callbacks.Location().callback, pass_user_data=True),
             MessageHandler(Filters.regex(cmd_next), callbacks.next_sight, pass_user_data=True),
             MessageHandler(Filters.regex(cmd_answer), callbacks.answer, pass_user_data=True),
             MessageHandler(Filters.regex(cmd_history), callbacks.history, pass_user_data=True),
@@ -67,16 +61,15 @@ def poll(test):
     conversation_handler = ConversationHandler(
         entry_points=entry_points,
         states=conversation_states,
-        fallbacks=fallbacks,
-        conversation_timeout=config.timeout
+        fallbacks=fallbacks
     )
 
     dispatcher.add_handler(conversation_handler)
     dispatcher.add_handler(CommandHandler('help', callbacks.help_message, pass_user_data=True))
-    dispatcher.add_handler(CommandHandler('start', callbacks.start, pass_user_data=True))
+    dispatcher.add_handler(CommandHandler('start', callbacks.Start().callback, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('stop', callbacks.stop, pass_user_data=True))
     dispatcher.add_handler(MessageHandler(Filters.command, callbacks.unknown_command, pass_user_data=True))
-    dispatcher.add_handler(MessageHandler('', callbacks.unknown_command, pass_user_data=True))
+    dispatcher.add_handler(MessageHandler(Filters.text, callbacks.unknown_command, pass_user_data=True))
     dispatcher.add_error_handler(callbacks.error_message)
 
     logger.info("started polling")
@@ -93,7 +86,7 @@ def poll(test):
 def parse(**kwargs):
     """Parse new routes from runcity.org
     """
-    commuter = SQLiteCommuter(config.path_to_db)
+    commuter = config.get_commuter()
 
     if kwargs.get('overwrite'):
         commuter.execute_script(os.path.join(config.path_to_scripts, 'delete_tables.sql'), commit=True)

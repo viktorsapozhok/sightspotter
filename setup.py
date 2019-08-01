@@ -34,10 +34,10 @@ setup(
     install_requires=[
         'beautifulsoup4',
         'Click',
-        'db-commuter>=0.1.6',
+        'db-commuter>=0.1.7',
         'numpy',
         'python-dotenv',
-        'python-telegram-bot>=12',
+        'python-telegram-bot>=12.0.0b1',
         'requests',
         'tqdm'
     ],

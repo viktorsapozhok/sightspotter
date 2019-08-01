@@ -1,9 +1,12 @@
 
+import logging
 import re
 import numpy as np
 
 from sightspotter import config
 from sightspotter import dbhelper
+
+logger = logging.getLogger('sightspotter')
 
 
 def init_user_data(user_data):
@@ -36,6 +39,7 @@ def get_state(user_data):
 
 
 def add_user_log(db, user_name, action):
+    logger.info(f'{user_name}: {action}')
     db.add_user_log(user_name, action)
 
 
