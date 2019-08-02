@@ -5,10 +5,8 @@
 
 import abc
 
-from telegram import ReplyKeyboardMarkup
-from telegram import ReplyKeyboardRemove
-from telegram import KeyboardButton
-from telegram import Location
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import KeyboardButton, Location
 
 from sightspotter import config
 

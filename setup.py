@@ -36,6 +36,7 @@ setup(
         'Click',
         'db-commuter>=0.1.7',
         'numpy',
+        'pandas',
         'python-dotenv',
         'python-telegram-bot>=12.0.0b1',
         'requests',
