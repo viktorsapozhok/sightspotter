@@ -1,36 +1,26 @@
-# A.Piskun
-# 11/11/2018
-#
-from telegram import Location
-import config
-import bot_tools
-from constants import PATHS
+# -*- coding: utf-8 -*-
 
-config.init_from_json(PATHS['to_config'])
+from telegram import Location
+
+from sightspotter import config, utils
 
 
 def test_remote_location():
-    user_data = bot_tools.init_user_data({})
-    config.set('max_distance', 10)
-    sights, _ = bot_tools.find_nearest_sights(user_data['db'], Location(20.4, 57.9))
+    sights, _ = utils.get_sights(Location(20.4, 57.9))
     assert len(sights) == 0
 
 
 def test_sight_location():
-    user_data = bot_tools.init_user_data({})
-    sights, _ = bot_tools.find_nearest_sights(user_data['db'], Location(37.620948, 55.688832))
+    sights, _ = utils.get_sights(Location(37.620948, 55.688832))
     assert sights[0][1] == 55.688832
     assert sights[0][2] == 37.620948
 
 
 def test_sight_history():
-    user_data = bot_tools.init_user_data({})
-    _, history = bot_tools.find_nearest_sights(user_data['db'], Location(-0.09531, 51.521681))
+    _, history = utils.get_sights(Location(-0.09531, 51.521681))
+    _history = history[0][0][1][:25]
+
     assert len(history[0][0][1]) > 1000
-
-    history_beg = history[0][0][1][:25]
-    for word in config.get('parser').get('remove_words_hist'):
-        assert word not in history_beg.lower()
-
-
+    for word in config.parser['remove_words_hist']:
+        assert word not in _history.lower()
 

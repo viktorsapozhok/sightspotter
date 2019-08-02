@@ -9,8 +9,9 @@ import os
 from telegram.ext import CommandHandler, ConversationHandler
 from telegram.ext import Filters, MessageHandler, Updater
 
+from sightspotter.callbacks import *
 from sightspotter.parser import RouteParser
-from sightspotter import callbacks, config, utils
+from sightspotter import config, utils
 
 logger = config.setup_logger()
 
@@ -39,24 +40,24 @@ def poll(test):
     dispatcher = updater.dispatcher
 
     entry_points = [
-        CommandHandler('start', callbacks.Start().callback, pass_user_data=True),
-        MessageHandler(Filters.location, callbacks.Location().callback, pass_user_data=True)
+        CommandHandler('start', Start().callback),
+        MessageHandler(Filters.location, Location().callback)
     ]
 
     conversation_states = {
         config.states['location']: [
-            MessageHandler(Filters.location, callbacks.Location().callback, pass_user_data=True)
+            MessageHandler(Filters.location, Location().callback)
         ],
         config.states['next']: [
-            MessageHandler(Filters.location, callbacks.Location().callback, pass_user_data=True),
-            MessageHandler(Filters.regex(cmd_next), callbacks.next_sight, pass_user_data=True),
-            MessageHandler(Filters.regex(cmd_answer), callbacks.answer, pass_user_data=True),
-            MessageHandler(Filters.regex(cmd_history), callbacks.history, pass_user_data=True),
-            MessageHandler(Filters.regex(cmd_map), callbacks.show_map, pass_user_data=True)
+            MessageHandler(Filters.location, Location().callback),
+            MessageHandler(Filters.regex(cmd_next), NextSight().callback),
+            MessageHandler(Filters.regex(cmd_answer), Answer().callback),
+            MessageHandler(Filters.regex(cmd_history), History().callback),
+            MessageHandler(Filters.regex(cmd_map), ShowMap().callback)
         ]
     }
 
-    fallbacks = [CommandHandler('stop', callbacks.stop, pass_user_data=True)]
+    fallbacks = [CommandHandler('stop', stop_callback)]
 
     conversation_handler = ConversationHandler(
         entry_points=entry_points,
@@ -65,12 +66,12 @@ def poll(test):
     )
 
     dispatcher.add_handler(conversation_handler)
-    dispatcher.add_handler(CommandHandler('help', callbacks.help_message, pass_user_data=True))
-    dispatcher.add_handler(CommandHandler('start', callbacks.Start().callback, pass_user_data=True))
-    dispatcher.add_handler(CommandHandler('stop', callbacks.stop, pass_user_data=True))
-    dispatcher.add_handler(MessageHandler(Filters.command, callbacks.unknown_command, pass_user_data=True))
-    dispatcher.add_handler(MessageHandler(Filters.text, callbacks.unknown_command, pass_user_data=True))
-    dispatcher.add_error_handler(callbacks.error_message)
+    dispatcher.add_handler(CommandHandler('help', help_callback))
+    dispatcher.add_handler(CommandHandler('start', Start().callback))
+    dispatcher.add_handler(CommandHandler('stop', stop_callback))
+    dispatcher.add_handler(MessageHandler(Filters.command, unknown_callback))
+    dispatcher.add_handler(MessageHandler(Filters.text, unknown_callback))
+    dispatcher.add_error_handler(error_callback)
 
     logger.info("started polling")
 

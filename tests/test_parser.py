@@ -1,56 +1,54 @@
-# A.Piskun
-# 28/11/2018
-#
-#
-import sqlite3
-from sightparser import Parser
-import config
-from constants import PATHS
+# -*- coding: utf-8 -*-
+
+from sightspotter import config
+from sightspotter.parser import RouteParser
+
+commuter = config.get_commuter()
 
 
 def test_parser():
-    parser = Parser(PATHS['to_db'], config.get('parser').get('url'))
-    urls = parser.extract_route_urls()
+    parser = RouteParser(commuter, config.parser['url'])
+    urls = parser.extract_routes()
+
     assert len(urls) >= 299
 
-    url = [u for u in urls if 'cherepovets2008' in u]
-    sights, histories, _, year = parser.parse_route(url[0], [], [], 0, -1)
+    _urls = [url for url in urls if 'cherepovets2008' in url]
+    sights, histories, _, year = parser.parse_route(_urls[0], 0, -1)
+
     assert len(sights) >= 44
     assert year == 2008
 
-    url = [u for u in urls if 'kazan2018' in u]
-    sights, histories, _, year = parser.parse_route(url[0], [], [], 0, -1)
+    _urls = [url for url in urls if 'kazan2018' in url]
+    sights, histories, _, year = parser.parse_route(_urls[0], 0, -1)
+
     assert len(sights) >= 37
     assert len(histories) >= 21
     assert year == 2018
 
 
-def test_tables():
-    conn = sqlite3.connect(PATHS['to_db'])
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM sights')
-    t = cur.fetchall()
-    assert len(t) > 10000
-    assert len(t[0]) == 10
-
-    cur.execute('SELECT DISTINCT event FROM sights')
-    t = cur.fetchall()
-    assert len(t) >= 218
-
-    cur.execute('SELECT * FROM history')
-    t = cur.fetchall()
-    assert len(t) > 2500
-    assert len(t[0]) == 4
-
-    cur.execute('SELECT * FROM user_log')
-    t = cur.fetchall()
-    assert len(t[0]) == 3
+def test_sights():
+    df = commuter.select('select * from sights')
+    assert len(df) > 10000
+    assert len(df.columns) == 10
 
 
-def test_sights_year():
-    conn = sqlite3.connect(PATHS['to_db'])
-    cur = conn.cursor()
-    cur.execute('SELECT year FROM sights where year < 2000')
-    t = cur.fetchall()
-    assert len(t) == 0
+def test_events():
+    df = commuter.select('select distinct event from sights')
+    assert len(df) >= 218
+
+
+def test_history():
+    df = commuter.select('select * from history')
+    assert len(df) > 2500
+    assert len(df.columns) == 4
+
+
+def test_user_log():
+    df = commuter.select('select * from user_log')
+    assert len(df.columns) == 3
+
+
+def test_year():
+    df = commuter.select('select year from sights where year < 2000')
+    assert len(df) == 0
 

@@ -1,93 +1,99 @@
-# A.Piskun
-# 24/11/2018
-#
-import os
-from telegram import Location
-import config
-import bot_tools
-from bot_replies import Reply
-from constants import PATHS
+# -*- coding: utf-8 -*-
 
-config.init_from_json(PATHS['to_config'])
+import pytest
+
+from telegram import Location
+
+from sightspotter import config
+from sightspotter import callbacks, replies, utils
+
+
+@pytest.fixture(scope='module')
+def context():
+    class Context(object):
+        user_data = dict()
+
+    return Context()
 
 
 def test_tokens():
-    for var in ['SSB_TOKEN', 'SSB_TEST_TOKEN']:
-        token = os.environ[var]
+    for token in [config.token, config.test_token]:
         prefix = token.split(':')[0]
+
         assert prefix.isdigit()
         assert len(prefix) == 9
 
 
 def test_start_reply():
-    user_data = bot_tools.init_user_data({})
-    reply = Reply(user_data, 'start')
+    reply = replies.StartReply(utils.get_user_data())
     button = reply.markup.keyboard[0][0]
+
     assert button.request_location is True
 
 
-def test_remote_location_reply():
-    user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, Location(20.4, 57.9))
-    reply = Reply(user_data, 'location')
-    assert reply.n_sights == 0
-    assert reply.sight is None
-    assert reply.markup.remove_keyboard is True
+def test_not_found_reply(context):
+    context.user_data = utils.get_user_data(Location(20.4, 57.9))
+    reply = callbacks.Location().create_reply(context)
+
+    assert reply.__class__.__name__ == 'NotFoundReply'
 
 
-def test_sight_location_reply():
-    user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, Location(37.620948, 55.688832))
-    reply = Reply(user_data, 'location')
-    assert reply.n_sights == config.get('max_next_events') + 1
+def test_sight_reply(context):
+    context.user_data = utils.get_user_data(Location(37.620948, 55.688832))
+    reply = callbacks.Location().create_reply(context)
+
+    assert reply.__class__.__name__ == 'SightReply'
     assert len(reply.markup.keyboard[0]) >= 2
     assert len(reply.markup.keyboard[1]) == 1
 
 
-def test_history_location_reply():
-    user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
-    reply = Reply(user_data, 'location')
-    assert reply.history is not None
-    assert reply.n_sights == config.get('max_next_events') + 1
+def test_history_location_reply(context):
+    context.user_data = utils.get_user_data(Location(-0.09531, 51.521681))
+    reply = callbacks.Location().create_reply(context)
+
+    assert reply.__class__.__name__ == 'SightReply'
+    assert len(reply.history) > 0
     assert len(reply.markup.keyboard[0]) == 3
     assert len(reply.markup.keyboard[1]) == 1
 
 
-def test_max_next_reply():
-    user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
-    user_data['next'] = config.get('max_next_events') + 1
-    reply = Reply(user_data, 'next')
+def test_max_next_reply(context):
+    context.user_data = utils.get_user_data(Location(-0.09531, 51.521681))
+    context.user_data['next'] = config.n_next + 1
+    reply = callbacks.NextSight().create_reply(context)
+    button = reply.markup.keyboard[0][0]
+
+    assert reply.__class__.__name__ == 'MaxNextEventsReply'
     assert len(reply.markup.keyboard) == 1
     assert len(reply.markup.keyboard[0]) == 1
-    button = reply.markup.keyboard[0][0]
     assert button.request_location is True
 
 
-def test_last_next_reply():
-    user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
-    user_data['sights'] = user_data['sights'][:3]
-    user_data['next'] = 2
-    reply = Reply(user_data, 'next')
+def test_last_next_reply(context):
+    context.user_data = utils.get_user_data(Location(-0.09531, 51.521681))
+    context.user_data['sights'] = context.user_data['sights'][:3]
+    context.user_data['next'] = 2
+    reply = callbacks.NextSight().create_reply(context)
+
+    assert reply.__class__.__name__ == 'SightReply'
     assert len(reply.markup.keyboard[0]) >= 2
     assert len(reply.markup.keyboard[1]) == 1
 
-    user_data['next'] = 3
-    reply = Reply(user_data, 'next')
+    context.user_data['next'] = 3
+    reply = callbacks.NextSight().create_reply(context)
+    button = reply.markup.keyboard[0][0]
+
+    assert reply.__class__.__name__ == 'NextNotFoundReply'
     assert len(reply.markup.keyboard) == 1
     assert len(reply.markup.keyboard[0]) == 1
-    button = reply.markup.keyboard[0][0]
     assert button.request_location is True
 
 
-def test_show_map_reply():
-    user_data = bot_tools.init_user_data({})
-    user_data = bot_tools.init_new_location(user_data, Location(-0.09531, 51.521681))
-    reply = Reply(user_data, 'show_map')
+def test_show_map_reply(context):
+    context.user_data = utils.get_user_data(Location(-0.09531, 51.521681))
+    reply = callbacks.ShowMap().create_reply(context)
+
     assert reply.location is not None
     assert isinstance(reply.location.latitude, float) is True
     assert isinstance(reply.location.longitude, float) is True
-
 
