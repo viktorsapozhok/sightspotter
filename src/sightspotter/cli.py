@@ -21,9 +21,9 @@ def sightspotter():
     """
 
 
-#@sightspotter.command()
-#@click.option(
-#    '--test', is_flag=True, help='Running in test environment')
+@sightspotter.command()
+@click.option(
+    '--test', is_flag=True, help='Running in test environment')
 def poll(test):
     """Start polling
     """
