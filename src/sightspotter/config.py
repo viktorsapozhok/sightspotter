@@ -33,10 +33,10 @@ states = {
     'next': 1
 }
 
+# radius (km) to select closest sights
 max_dist = 10
+# maximal amount of sights allowed to show
 n_next = 10
-# timeout (seconds)
-timeout = 1200
 
 # new line variable
 nl = '\n'
