@@ -18,5 +18,5 @@ RUN cd /sightspotter && python setup.py develop
 
 WORKDIR /
 
-CMD exec sightspotter poll --test
+CMD exec sightspotter poll
 
