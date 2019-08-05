@@ -46,6 +46,11 @@ setup(
         [console_scripts]
         sightspotter=sightspotter.cli:sightspotter
     ''',
+    extras_require={
+        'test': [
+            'pytest'
+        ]
+    },
     python_requires='>=3.6',
     classifiers=[
         'Programming Language :: Python :: 3',
