@@ -16,28 +16,23 @@ logger = logging.getLogger('sightspotter')
 
 
 class BotCallback(abc.ABC):
-    def update_data(self, update, context):
-        pass
+    def callback(self, update, context):
+        self.update_data(update, context)
+        reply = self.create_reply(context)
+
+        user_name = update.message.from_user.full_name
+
+        update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
+        utils.write_log(user_name, self.__class__.__name__)
+
+        return reply.state
 
     @abc.abstractmethod
     def create_reply(self, context):
         raise NotImplementedError()
 
-    @abc.abstractmethod
-    def create_log(self):
-        raise NotImplementedError()
-
-    def callback(self, update, context):
-        self.update_data(update, context)
-        reply = self.create_reply(context)
-        user_log = self.create_log()
-
-        user_name = update.message.from_user.full_name
-
-        update.message.reply_text(reply.text, parse_mode='Markdown', reply_markup=reply.markup)
-        utils.write_log(user_name, user_log)
-
-        return reply.state
+    def update_data(self, update, context):
+        pass
 
 
 class Start(BotCallback):
@@ -46,9 +41,6 @@ class Start(BotCallback):
 
     def create_reply(self, context):
         return replies.StartReply(context.user_data)
-
-    def create_log(self):
-        return 'start'
 
 
 class Location(BotCallback):
@@ -63,9 +55,6 @@ class Location(BotCallback):
             return replies.NotFoundReply(context.user_data)
         else:
             return replies.SightReply(context.user_data)
-
-    def create_log(self):
-        return 'location'
 
 
 class NextSight(BotCallback):
@@ -82,36 +71,23 @@ class NextSight(BotCallback):
         else:
             return replies.SightReply(context.user_data)
 
-    def create_log(self):
-        return 'next'
-
 
 class Answer(BotCallback):
     def create_reply(self, context):
         return replies.AnswerReply(context.user_data)
-
-    def create_log(self):
-        return 'answer'
 
 
 class History(BotCallback):
     def create_reply(self, context):
         return replies.HistoryReply(context.user_data)
 
-    def create_log(self):
-        return 'history'
-
 
 class ShowMap(BotCallback):
     def create_reply(self, context):
         return replies.MapReply(context.user_data)
 
-    def create_log(self):
-        return 'map'
-
     def callback(self, update, context):
         reply = self.create_reply(context)
-        user_log = self.create_log()
 
         user_name = update.message.from_user.full_name
 
@@ -124,7 +100,7 @@ class ShowMap(BotCallback):
         else:
             update.message.reply_text(config.messages['unknown'], reply_markup=reply.markup)
 
-        utils.write_log(user_name, user_log)
+        utils.write_log(user_name, self.__class__.__name__)
 
         return reply.state
 
