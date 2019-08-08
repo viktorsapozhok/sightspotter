@@ -19,7 +19,7 @@ path_to_env = os.path.join(root_dir, 'app', 'secret.env')
 # path to scripts
 path_to_scripts = os.path.join(root_dir, 'scripts')
 
-# load secrets into environ
+# load secrets into environment variables
 load_dotenv(path_to_env)
 
 # bot API token (production)
