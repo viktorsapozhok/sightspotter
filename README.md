@@ -7,4 +7,4 @@ Discover your city while completing small tasks.
 
 Just go to the Telegram app on your device and find a bot named **@sightspotter_bot**
 
-<p align="center"><img src="misc/IMG_3131.jpg"></p>  
+<p align="center"><img src="misc/IMG_3131.jpg" width="600"></p>  
