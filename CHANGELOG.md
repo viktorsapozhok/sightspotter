@@ -3,8 +3,6 @@
 ## [0.1.1] - 2019-12-31
 ### Added
 - Docker tools
-- Integrated with `travis-ci`
-- Integrated with `codecov` 
 - `__call__` method to callback classes
 - Integrated with `tox`
 
