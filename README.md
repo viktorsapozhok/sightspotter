@@ -1,10 +1,5 @@
 # sightspotter
 
-[![Python](https://img.shields.io/badge/python-3.7-blue)](https://www.python.org)
-[![Build Status](https://travis-ci.org/viktorsapozhok/sightspotter.svg?branch=master)](https://travis-ci.org/viktorsapozhok/sightspotter)
-[![codecov](https://codecov.io/gh/viktorsapozhok/sightspotter/branch/master/graph/badge.svg)](https://codecov.io/gh/viktorsapozhok/sightspotter)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-
 Telegram bot for interactive search of the city artifacts based on runcity.org routes database. 
 Discover your city while completing small tasks.
 
