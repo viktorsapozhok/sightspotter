@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS user_log(
     date timestamp,
     name text,

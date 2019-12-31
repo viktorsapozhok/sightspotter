@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-
 import pytest
 
 from telegram import Location
 
-from sightspotter import config
-from sightspotter import callbacks, replies, utils
+from bot import callbacks, config, replies, utils
 
 
 @pytest.fixture(scope='module')
@@ -96,4 +94,3 @@ def test_show_map_reply(context):
     assert reply.location is not None
     assert isinstance(reply.location.latitude, float) is True
     assert isinstance(reply.location.longitude, float) is True
-

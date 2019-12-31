@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
-from sightspotter import config
-from sightspotter.parser import RouteParser
+from bot import config
+from bot.parser import RouteParser
 
 commuter = config.get_commuter()
 
@@ -51,4 +50,3 @@ def test_user_log():
 def test_year():
     df = commuter.select('select year from sights where year < 2000')
     assert len(df) == 0
-

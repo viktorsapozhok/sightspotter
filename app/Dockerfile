@@ -13,10 +13,9 @@ COPY db/sightspotter.sqlite3 /sightspotter/db/sightspotter.sqlite3
 
 # build from setup
 ADD setup.py /sightspotter
-ADD src/sightspotter /sightspotter/src/sightspotter
+ADD bot /sightspotter/bot
 RUN cd /sightspotter && python setup.py develop
 
 WORKDIR /
 
 CMD exec sightspotter poll
-

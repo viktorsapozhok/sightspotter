@@ -2,20 +2,20 @@
 
 """Configuration parameters
 """
-
 import logging
 import os
 
 from dotenv import load_dotenv
-
 from db_commuter import SQLiteCommuter
 
-root_dir = os.path.dirname(os.path.abspath(os.path.join(__file__, '../..')))
+root_dir = os.path.dirname(os.path.abspath(os.path.join(__file__, '..')))
 
 # path to database
 path_to_db = os.path.join(root_dir, 'db', 'sightspotter.sqlite3')
+
 # path to .env file
 path_to_env = os.path.join(root_dir, 'app', 'secret.env')
+
 # path to scripts
 path_to_scripts = os.path.join(root_dir, 'scripts')
 
@@ -46,7 +46,8 @@ messages = {
     'start':
         f'Чтобы начать, пришлите свое местоположение:{nl + nl}'
         f'- кнопка \"Отправить геолокацию\"{nl}'
-        f'(в случае ошибки нужно разрешить в настройках доступ приложения к службам геолокации){nl + nl}'
+        f'(в случае ошибки нужно разрешить в настройках доступ '
+        f'приложения к службам геолокации){nl + nl}'
         f'- либо отправьте местоположение через аттачмент (значок скрепки)',
     'stop':
         f'Бот остановлен',
@@ -95,23 +96,24 @@ parser = {
 }
 
 # database tables parameters
-db_tables = {
-    'routes': {
-        'columns': ['event', 'year', 'route']
-    },
-    'sights': {
-        'columns': ['sight_id', 'lat', 'lon', 'event', 'cp_id',
-                    'address', 'description', 'quest', 'answer', 'year']
-    },
-    'history': {
-        'columns': ['sight_id', 'event', 'cp_id', 'history']
-    }
+db_config = {
+    'routes': [
+        'event', 'year', 'route'
+    ],
+    'sights': [
+        'sight_id', 'lat', 'lon', 'event', 'cp_id',
+        'address', 'description', 'quest', 'answer', 'year'
+    ],
+    'history': [
+        'sight_id', 'event', 'cp_id', 'history'
+    ]
 }
 
 
 def setup_logger():
     """Configure logger
     """
+
     logger = logging.getLogger('sightspotter')
 
     # set stream handler format
@@ -129,4 +131,3 @@ def setup_logger():
 
 def get_commuter():
     return SQLiteCommuter(path_to_db)
-

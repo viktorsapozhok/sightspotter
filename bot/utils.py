@@ -2,14 +2,14 @@
 
 """Utilities
 """
-
 from datetime import datetime
 import logging
 import re
+from typing import Any, Dict
 
 import numpy as np
 
-from sightspotter import config
+from . import config
 
 logger = logging.getLogger('sightspotter')
 commuter = config.get_commuter()
@@ -27,17 +27,17 @@ def get_sights_count(sights):
 
 
 def get_user_data(location=None):
-    _data = dict()
-    _data['next'] = 0
-    _data['location'] = None
-    _data['sights'] = None
-    _data['history'] = None
+    data = dict()  # type: Dict[str, Any]
+    data['next'] = 0
+    data['location'] = None
+    data['sights'] = None
+    data['history'] = None
 
     if location is not None:
-        _data['location'] = location
-        _data['sights'], _data['history'] = get_sights(location)
+        data['location'] = location
+        data['sights'], data['history'] = get_sights(location)
 
-    return _data
+    return data
 
 
 def get_sights(location):
@@ -68,44 +68,74 @@ def get_sights(location):
 
 
 def select_sights_from_area(lat_1, lat_2, lon_1, lon_2):
-    sql = \
-        f'select sight_id, lat, lon, address, description, quest, answer, year ' \
-        f'from sights ' \
-        f'where (lat between {lat_1} and {lat_2}) and (lon between {lon_1} and {lon_2})'
+    sql = f"""
+    SELECT
+        sight_id, lat, lon, address, description, quest, answer, year
+    FROM
+        sights
+    WHERE
+        lat BETWEEN {lat_1} AND {lat_2} AND
+        lon BETWEEN {lon_1} AND {lon_2}
+    """
+
     df = commuter.select(sql)
+
     return df.values.tolist()
 
 
 def select_history(sight_id):
-    sql = f'select sight_id, history from history where sight_id={sight_id}'
+    sql = f"""
+    SELECT
+        sight_id, history
+    FROM
+        history
+    WHERE
+        sight_id={sight_id}
+    """
+
     df = commuter.select(sql)
+
     return df.values.tolist()
 
 
 def get_lat_interval(location, distance):
-    dist = get_distance(location.latitude + 0.1, location.longitude, location)
+    dist = get_distance(
+        lat=location.latitude + 0.1,
+        lon=location.longitude,
+        location=location)
+
     delta = 0.1 * distance / dist
     lat_1 = location.latitude - (0.5 * delta)
     lat_2 = location.latitude + (0.5 * delta)
+
     return lat_1, lat_2
 
 
 def get_lon_interval(location, distance):
-    dist = get_distance(location.latitude, location.longitude + 0.1, location)
+    dist = get_distance(
+        lat=location.latitude,
+        lon=location.longitude + 0.1,
+        location=location)
+
     delta = 0.1 * distance / dist
     lon_1 = location.longitude - (0.5 * delta)
     lon_2 = location.longitude + (0.5 * delta)
+
     return lon_1, lon_2
 
 
 def get_distance(lat, lon, location):
     lat1 = np.radians(lat)
     lon1 = np.radians(lon)
+
     lat2 = np.radians(location.latitude)
     lon2 = np.radians(location.longitude)
+
     d_lat = lat1 - lat2
     d_lon = lon1 - lon2
+
     a = np.sin(d_lat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(d_lon / 2)**2
+
     return 6373.0 * 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
 
@@ -119,6 +149,7 @@ def get_state(user_data):
     if 'next' in user_data:
         if user_data['next'] > 0:
             return config.states['next']
+
     return config.states['location']
 
 
@@ -130,4 +161,3 @@ def write_log(user_name, user_log):
     commuter.execute(
         'insert into user_log values (?, ?, ?)',
         vars=(date, user_name, user_log))
-

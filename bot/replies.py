@@ -2,16 +2,30 @@
 
 """Bot replies
 """
+__all__ = [
+    'StartReply',
+    'NotFoundReply',
+    'SightReply',
+    'MaxNextEventsReply',
+    'NextNotFoundReply',
+    'AnswerReply',
+    'HistoryReply',
+    'MapReply'
+]
 
 import abc
 
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram import KeyboardButton, Location
+from telegram import (
+    KeyboardButton,
+    Location,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove
+)
 
-from sightspotter import config
+from . import config
 
 
-class BotReply(abc.ABC):
+class BaseReply(abc.ABC):
     def __init__(self, user_data):
         self.user_data = user_data
 
@@ -31,7 +45,7 @@ class BotReply(abc.ABC):
         raise NotImplementedError()
 
 
-class StartReply(BotReply):
+class StartReply(BaseReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
@@ -52,7 +66,7 @@ class StartReply(BotReply):
         return config.states['location']
 
 
-class NotFoundReply(BotReply):
+class NotFoundReply(BaseReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
@@ -69,7 +83,7 @@ class NotFoundReply(BotReply):
         return config.states['location']
 
 
-class SightReply(BotReply):
+class SightReply(BaseReply):
     def __init__(self, user_data):
         super().__init__(user_data)
 
@@ -81,7 +95,8 @@ class SightReply(BotReply):
         nl = '\n'
         reply = \
             f'*Адрес:*{nl + str(self.sight[3]) + nl + nl} ' \
-            f'*Задание:*{nl + str(self.sight[4])}. {str(self.sight[5]) + nl + nl} ' \
+            f'*Задание:*{nl + str(self.sight[4])}. ' \
+            f'{str(self.sight[5]) + nl + nl} ' \
             f'*Год маршрута:*{nl + str(self.sight[7])}'
         return reply
 
@@ -94,7 +109,8 @@ class SightReply(BotReply):
 
         if self.history is None:
             keyboard = [
-                [config.button_titles['next'], config.button_titles['answer']],
+                [config.button_titles['next'],
+                 config.button_titles['answer']],
                 [config.button_titles['map']], [location_button]]
         else:
             keyboard = [[config.button_titles['next'],
@@ -177,4 +193,3 @@ class MapReply(SightReply):
     @property
     def location(self):
         return Location(self.sight[2], self.sight[1])
-

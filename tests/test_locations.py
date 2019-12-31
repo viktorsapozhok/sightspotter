@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
 from telegram import Location
 
-from sightspotter import config, utils
+from bot import config, utils
 
 
 def test_remote_location():
@@ -23,4 +22,3 @@ def test_sight_history():
     assert len(history[0][0][1]) > 1000
     for word in config.parser['remove_words_hist']:
         assert word not in _history.lower()
-

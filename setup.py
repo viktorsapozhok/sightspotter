@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
+from os import path
+from setuptools import setup
 
-import os
-from setuptools import find_packages, setup
+version = '0.1.1'
 
-version = '0.1.0'
-
-root_dir = os.path.abspath(os.path.dirname(__file__))
+root_dir = path.abspath(path.dirname(__file__))
 
 try:
-    with open(os.path.join(root_dir, 'README.md'), 'r', encoding='utf-8') as f:
+    with open(
+            path.join(root_dir, 'README.md'),
+            mode='r',
+            encoding='utf-8'
+    ) as f:
         long_description = f.read()
 except IOError:
     long_description = ''
 
 # init version
-version_path = os.path.join(root_dir, 'src', 'sightspotter', 'version.py')
+version_path = path.join(root_dir, 'bot', 'version.py')
 with open(version_path, 'w') as f:
     f.write('__version__ = "{}"\n'.format(version))
 
@@ -27,34 +30,27 @@ setup(
     author='Alex Piskun',
     author_email='piskun.aleksey@gmail.com',
     url='https://github.com/viktorsapozhok/sightspotter',
-    package_dir={'': 'src'},
+    packages=['bot'],
     include_package_data=True,
     zip_safe=False,
-    packages=find_packages('src'),
     install_requires=[
-        'beautifulsoup4',
-        'Click',
-        'db-commuter>=0.1.7',
+        'beautifulsoup4==4.8.0',
+        'click',
+        'db-commuter==0.1.13',
         'numpy',
-        'pandas',
+        'pandas>=0.24.0',
         'python-dotenv',
-        'python-telegram-bot>=12.0.0b1',
-        'requests',
+        'python-telegram-bot==12.0.0b1',
+        'requests==2.22.0',
         'tqdm'
     ],
-    entry_points='''
-        [console_scripts]
-        sightspotter=sightspotter.cli:sightspotter
-    ''',
-    extras_require={
-        'test': [
-            'pytest'
+    entry_points={
+        'console_scripts': [
+            'sightspotter=bot.cli:sightspotter'
         ]
     },
-    python_requires='>=3.6',
-    classifiers=[
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent'
-    ]
+    extras_require={
+        'test': ['pytest', 'tox>=3.10.0']
+    },
+    python_requires='>=3.6'
 )
