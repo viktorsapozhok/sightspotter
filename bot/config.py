@@ -6,7 +6,6 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from db_commuter import SQLiteCommuter
 
 root_dir = os.path.dirname(os.path.abspath(os.path.join(__file__, '..')))
 
@@ -127,7 +126,3 @@ def setup_logger():
     logger.setLevel(logging.INFO)
 
     return logger
-
-
-def get_commuter():
-    return SQLiteCommuter(path_to_db)

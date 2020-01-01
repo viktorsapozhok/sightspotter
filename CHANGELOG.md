@@ -1,5 +1,12 @@
 # ChangeLog
 
+## [0.1.2] - 2020-01-01
+### Added
+- `Commuter` class
+
+### Changed
+- Deprecated `db-commuter`
+
 ## [0.1.1] - 2019-12-31
 ### Added
 - Docker tools

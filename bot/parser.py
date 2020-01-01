@@ -159,16 +159,8 @@ class RouteParser(object):
         return self.commuter.select(sql)
 
     def _get_max_index(self):
-        index = 0
-        df = self.commuter.select('SELECT MAX(sight_id) FROM sights')
-
-        if not df.empty:
-            index = df.iloc[0][0]
-
-        if index is None:
-            return 0
-
-        return index
+        cmd = 'SELECT MAX(sight_id) FROM sights'
+        return self.commuter.select(cmd=cmd, return_scalar=0)
 
     @staticmethod
     def _get_event(route):

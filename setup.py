@@ -2,7 +2,7 @@
 from os import path
 from setuptools import setup
 
-version = '0.1.1'
+version = '0.1.2'
 
 root_dir = path.abspath(path.dirname(__file__))
 
@@ -36,11 +36,11 @@ setup(
     install_requires=[
         'beautifulsoup4==4.8.0',
         'click',
-        'db-commuter==0.1.13',
         'numpy',
         'pandas>=0.24.0',
         'python-dotenv',
         'python-telegram-bot==12.0.0b1',
+        'sqlalchemy>=1.3.3',
         'requests==2.22.0',
         'tqdm'
     ],

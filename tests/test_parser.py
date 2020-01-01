@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from bot import config
+from bot.commuter import Commuter
 from bot.parser import RouteParser
 
-commuter = config.get_commuter()
+commuter = Commuter(config.path_to_db)
 
 
 def test_parser():

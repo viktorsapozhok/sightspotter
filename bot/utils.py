@@ -10,9 +10,10 @@ from typing import Any, Dict
 import numpy as np
 
 from . import config
+from .commuter import Commuter
 
 logger = logging.getLogger('sightspotter')
-commuter = config.get_commuter()
+commuter = Commuter(config.path_to_db)
 
 
 def command_pattern(cmd):
