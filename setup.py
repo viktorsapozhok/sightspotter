@@ -41,7 +41,7 @@ setup(
         'python-dotenv',
         'python-telegram-bot==12.0.0b1',
         'sqlalchemy>=1.3.3',
-        'requests==2.22.0',
+        'requests==2.31.0',
         'tqdm'
     ],
     entry_points={
